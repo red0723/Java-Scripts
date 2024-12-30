@@ -1,5 +1,6 @@
 
 import java.io.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class TicTacToe {
     public static void main(String[] args) throws IOException {
@@ -23,14 +24,19 @@ public class TicTacToe {
     }
 
     public static void gamePlay(String[] board) throws IOException {
+        winCheck(board);
         computerMove(board);
+        winCheck(board);
         playerMove(board);
-        display(board);
+        TicTacToe.gamePlay(board);
+    }
+
+    public static void winCheck(String[] board) {
         int i = 0;
+        boolean winner = false;
         for (String cell : board) {
-            if (cell != "X" && cell != "O") {
-                break;
-            } else if ((board[0] == "X" && board[1] == "X" && board[2] == "X")
+
+            if ((board[0] == "X" && board[1] == "X" && board[2] == "X")
                     || (board[3] == "X" && board[4] == "X" && board[5] == "X")
                     || (board[6] == "X" && board[7] == "X" && board[8] == "X")
                     || (board[0] == "X" && board[3] == "X" && board[6] == "X")
@@ -39,7 +45,7 @@ public class TicTacToe {
                     || (board[0] == "X" && board[4] == "X" && board[8] == "X")
                     || (board[2] == "X" && board[4] == "X" && board[6] == "X")) {
                 System.out.println("You WIN!!!");
-                return;
+                winner = true;
 
             } else if ((board[0] == "O" && board[1] == "O" && board[2] == "O")
                     || (board[3] == "O" && board[4] == "O" && board[5] == "O")
@@ -50,49 +56,59 @@ public class TicTacToe {
                     || (board[0] == "O" && board[4] == "O" && board[8] == "O")
                     || (board[2] == "O" && board[4] == "O" && board[6] == "O")) {
                 System.out.println("The Computer wins");
-                return;
-
+                winner = true;
+            } else if (cell != "X" && cell != "O") {
+                break;
             } else {
                 i++;
                 if (i == board.length) {
                     System.out.println("Its a Tie!!!");
-                    return;
+                    winner = true;
                 }
             }
+            if (winner) {
+                display(board);
+                System.exit(i);
+            }
         }
-        TicTacToe.gamePlay(board);
+        display(board);
     }
 
     public static String[] computerMove(String[] board) {
         String newBoard[] = {};
-        int i = 0;
-        for (String element : board) {
-
-            if (element != ("X") && element != ("O")) {
-
-                board[i] = "O";
+        int index = 0;
+        while (index < 40) {
+            int randomCell = ThreadLocalRandom.current().nextInt((board.length));
+            if (board[randomCell] != ("X") && board[randomCell] != ("O")) {
+                board[randomCell] = "O";
                 newBoard = board;
-                display(newBoard);
                 return newBoard;
             }
-            i++;
         }
         return board;
     }
 
     public static String[] playerMove(String[] board) throws IOException {
-        int i = 0;
-        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-
-        String userSelection = input.readLine();
-        String newBoard[] = {};
-        for (String element : board) {
-            if (element.equals(userSelection)) {
-                board[i] = "X";
-                newBoard = board;
-                return newBoard;
+        for (int j = 0; j < 3; j++) {
+            BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+            System.out.println("Select X's spot:");
+            String userSelection = input.readLine();
+            String newBoard[] = {};
+            int indexPlayer = 0;
+            for (String element : board) {
+                if ((element.equals(userSelection)) && (board[indexPlayer] != "X") && (board[indexPlayer] != "O")) {
+                    board[indexPlayer] = "X";
+                    newBoard = board;
+                    return newBoard;
+                }
+                indexPlayer++;
             }
-            i++;
+            System.out.println(
+                    "The character chosen doesn't exist on the board, select a valid number between 1-9 that exists on the current board.");
+            if (j == 2) {
+                System.out.println("Exiting game due to incorrect player input.");
+                System.exit(j);
+            }
         }
         return board;
     }
